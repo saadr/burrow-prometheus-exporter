@@ -4,7 +4,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def request_burrow(url):
+def query_burrow(url):
     try:
         response = requests.get(url).json()
         return response
@@ -20,32 +20,48 @@ class BurrowClient:
         self.endpoint = f'http://{host}:{port}/v3/kafka'
 
     def get_clusters(self, include=None, exclude=None):
-        response = request_burrow(f'{self.endpoint}')
+        if exclude == '*':
+            return []
+        response = query_burrow(f'{self.endpoint}')
         clusters = response['clusters']
+        if include == '*':
+            return clusters
         if include:
-            clusters = list(set(clusters) & set(include))
+            return list(set(clusters) & set(include))
         if exclude:
-            clusters = list(set(clusters) - set(exclude))
+            return list(set(clusters) - set(exclude))
         return clusters
 
     def get_consumers(self, cluster, include=None, exclude=None):
-        response = request_burrow(f'{self.endpoint}/{cluster}/consumer')
+        if exclude == '*':
+            return []
+        response = query_burrow(f'{self.endpoint}/{cluster}/consumer')
         consumers = response['consumers']
+        if include == '*':
+            return consumers
         if include:
-            consumers = list(set(consumers) & set(include))
+            return list(set(consumers) & set(include))
         if exclude:
-            consumers = list(set(consumers) - set(exclude))
+            return list(set(consumers) - set(exclude))
         return consumers
 
     def get_topics(self, cluster, include=None, exclude=None):
-        response = request_burrow(f'{self.endpoint}/{cluster}/topic')
+        if exclude == '*':
+            return []
+        response = query_burrow(f'{self.endpoint}/{cluster}/topic')
         topics = response['topics']
+        if include == '*':
+            return topics
         if include:
-            topics = list(set(topics) & set(include))
+            return list(set(topics) & set(include))
         if exclude:
-            topics = list(set(topics) - set(exclude))
+            return list(set(topics) - set(exclude))
         return topics
 
+    def get_topic_partition_offset(self, cluster, topic):
+        response = query_burrow(f'{self.endpoint}/{cluster}/topic/{topic}')
+        offsets = response['offsets']
+        return offsets
 
     def get_consumer_lag(self, cluster, consumer_group):
-        return request_burrow(f'{self.endpoint}/{cluster}/consumer/{consumer_group}/lag')
+        return query_burrow(f'{self.endpoint}/{cluster}/consumer/{consumer_group}/lag')

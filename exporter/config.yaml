@@ -1,3 +1,26 @@
 burrow:
   host: localhost
   port: 8000
+
+cluster:
+#  include: *
+#  exclude: : [cluster1, cluster2]
+
+consumer_group:
+#  include: *
+#  exclude: [group1, group2]
+  metrics:
+    - status
+    - patrition-lag
+    - total-lag
+    - partition-current-offset
+    - partition-max-offset
+    - partition-status
+
+topic:
+#  include: *
+#  exclude: [topic1, topic2]
+  metrics:
+    - partition-offset
+
+
