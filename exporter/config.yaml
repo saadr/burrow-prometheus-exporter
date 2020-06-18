@@ -8,18 +8,19 @@ cluster:
 
 consumer_group:
 #  include: *
-#  exclude: [group1, group2]
+  exclude: [burrow-local]
   metrics:
     - status
-    - patrition-lag
+    - partition-lag
     - total-lag
+    - max-lag
     - partition-current-offset
     - partition-max-offset
     - partition-status
 
 topic:
 #  include: *
-#  exclude: [topic1, topic2]
+  exclude: [__consumer_offsets, __confluent.support.metrics]
   metrics:
     - partition-offset
 

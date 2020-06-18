@@ -60,8 +60,8 @@ class BurrowClient:
 
     def get_topic_partition_offset(self, cluster, topic):
         response = query_burrow(f'{self.endpoint}/{cluster}/topic/{topic}')
-        offsets = response['offsets']
-        return offsets
+        return response['offsets']
 
-    def get_consumer_lag(self, cluster, consumer_group):
-        return query_burrow(f'{self.endpoint}/{cluster}/consumer/{consumer_group}/lag')
+    def get_consumer_lag(self, cluster, consumer):
+        response = query_burrow(f'{self.endpoint}/{cluster}/consumer/{consumer}/lag')
+        return response['status']
