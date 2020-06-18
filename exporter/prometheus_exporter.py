@@ -11,7 +11,7 @@ from prometheus_client import REGISTRY
 
 log = logging.getLogger(__name__)
 
-CONFIG_FILE = Path.cwd() / "config.yaml"
+CONFIG_FILE = Path.cwd().parent / "config.yaml"
 
 
 def load_config():

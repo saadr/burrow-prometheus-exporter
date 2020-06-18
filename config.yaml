@@ -3,12 +3,12 @@ burrow:
   port: 8000
 
 cluster:
-#  include: *
+  include: '*'
 #  exclude: : [cluster1, cluster2]
 
 consumer_group:
-#  include: *
-  exclude: [burrow-local]
+  include: [test_group]
+#  exclude: [burrow-local]
   metrics:
     - status
     - total-lag
