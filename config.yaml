@@ -2,6 +2,8 @@ burrow:
   host: localhost
   port: 8000
 
+expose_port: 8001
+
 cluster:
   include: '*'
 #  exclude: : [cluster1, cluster2]
@@ -19,7 +21,7 @@ consumer_group:
 
 topic:
   include: '*'
-  exclude: : '__consumer_offsets'
+  exclude: '__consumer_offsets'
   metrics:
     - partition-offset
 

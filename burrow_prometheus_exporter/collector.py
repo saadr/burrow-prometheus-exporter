@@ -1,37 +1,11 @@
 import logging
-from pathlib import Path
-
-import yaml
 from prometheus_client.core import GaugeMetricFamily
 
 from burrow_prometheus_exporter.burrow_client import BurrowClient
+from burrow_prometheus_exporter.config import Config
 
 log = logging.getLogger(__name__)
-
-CONFIG_FILE = Path.cwd().parent / "config.yaml"
-
-
-def load_config():
-    try:
-        with open(CONFIG_FILE) as file:
-            return yaml.load(file, Loader=yaml.FullLoader)
-    except FileNotFoundError:
-        return {}
-
-
-config = load_config()
-
-
-def conf(path):
-    children = path.split('.')
-    i = 0
-    x = config
-    while i < len(children):
-        x = x.get(children[i])
-        if x is None:
-            return None
-        i = i + 1
-    return x
+config = Config()
 
 
 def get_status(status):
@@ -163,22 +137,18 @@ def collect_consumer_metrics(client, cluster, consumer, metrics):
 class BurrowMetricsCollector(object):
 
     def collect(self):
-        client = BurrowClient(conf('burrow.host'), conf('burrow.port'))
-        clusters = client.get_clusters(conf('cluster.include'), conf('cluster.exclude'))
+        client = BurrowClient(config.get('burrow.host'), config.get('burrow.port'))
+        clusters = client.get_clusters(config.get('cluster.include'), config.get('cluster.exclude'))
 
         for cluster in clusters:
             # Topic Metrics
-            if conf('topic.metrics'):
-                topics = client.get_topics(cluster, conf('topic.include'), conf('topic.exclude'))
+            if config.get('topic.metrics'):
+                topics = client.get_topics(cluster, config.get('topic.include'), config.get('topic.exclude'))
                 for topic in topics:
-                    yield from collect_topic_metrics(client, cluster, topic, conf('topic.metrics'))
+                    yield from collect_topic_metrics(client, cluster, topic, config.get('topic.metrics'))
 
-            if conf('consumer_group.metrics'):
+            if config.get('consumer_group.metrics'):
                 # Consumer group metrics
-                consumers = client.get_consumers(cluster, conf('consumer_group.include'), conf('consumer_group.exclude'))
+                consumers = client.get_consumers(cluster, config.get('consumer_group.include'), config.get('consumer_group.exclude'))
                 for consumer in consumers:
-                    yield from collect_consumer_metrics(client, cluster, consumer, conf('consumer_group.metrics'))
-
-
-
-
+                    yield from collect_consumer_metrics(client, cluster, consumer, config.get('consumer_group.metrics'))

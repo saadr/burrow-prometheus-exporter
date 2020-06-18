@@ -1,15 +1,16 @@
 import time
-
-from burrow_prometheus_exporter.collector import BurrowMetricsCollector
-from prometheus_client import REGISTRY, start_http_server
 import logging
+from prometheus_client import REGISTRY, start_http_server
+from burrow_prometheus_exporter.collector import BurrowMetricsCollector
+from burrow_prometheus_exporter.config import Config
 
 log = logging.getLogger(__name__)
+config = Config()
 
 
 def main():
     log.info('Starting server...')
-    port = 8001
+    port = config.get('expose_port')
     start_http_server(port)
     log.info(f'Server started on port {port}')
     REGISTRY.register(BurrowMetricsCollector())
