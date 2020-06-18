@@ -37,10 +37,15 @@ def conf(path):
     return x
 
 
+def get_status(status):
+    possible_status = {'ERR': 0, 'OK': 1, 'WARN': 2, 'NOTFOUND': 3, 'STOP': 4, 'STALL': 6}
+    return possible_status.get(status, 99)
+
+
 def metric_topic_partition_offset(cluster, topic, offsets):
     m_partition_offset = GaugeMetricFamily(
         "kafka_topic_partition_offset",
-        "*****************************",
+        "Topic partitions latest offsets",
         labels=["cluster", "topic", "partition"]
     )
     for i, offset in enumerate(offsets):
@@ -51,10 +56,23 @@ def metric_topic_partition_offset(cluster, topic, offsets):
     yield m_partition_offset
 
 
+def metric_consumer_status(cluster, consumer, status):
+    m_status = GaugeMetricFamily(
+        "kafka_consumer_status",
+        "Consumer status",
+        labels=["cluster", "consumer_group"]
+    )
+    m_status.add_metric(
+        [cluster, consumer],
+        get_status(status)
+    )
+    yield m_status
+
+
 def metric_consumer_total_lag(cluster, consumer, total_lag):
     m_total_lag = GaugeMetricFamily(
         "kafka_consumer_total_lag",
-        "*****************************",
+        "Consumer total lag",
         labels=["cluster", "consumer_group"]
     )
     m_total_lag.add_metric(
@@ -67,7 +85,7 @@ def metric_consumer_total_lag(cluster, consumer, total_lag):
 def metric_consumer_max_lag(cluster, consumer, max_lag):
     m_max_lag = GaugeMetricFamily(
         "kafka_consumer_max_lag",
-        "*****************************",
+        "Consumer max lag",
         labels=["cluster", "consumer_group", "topic", "partition"]
     )
     m_max_lag.add_metric(
@@ -80,7 +98,7 @@ def metric_consumer_max_lag(cluster, consumer, max_lag):
 def metric_partition_lag(cluster, consumer, partitions):
     m_partition_lag = GaugeMetricFamily(
         "kafka_consumer_partition_lag",
-        "The latest partition offset for a topic.",
+        "Consumer partition lag",
         labels=["cluster", "consumer_group", "topic", "partition"]
     )
     for partition in partitions:
@@ -91,6 +109,34 @@ def metric_partition_lag(cluster, consumer, partitions):
     yield m_partition_lag
 
 
+def metric_partition_offset(cluster, consumer, partitions):
+    m_partition_offset = GaugeMetricFamily(
+        "kafka_consumer_partition_offset",
+        "Consumer latest partition offset",
+        labels=["cluster", "consumer_group", "topic", "partition"]
+    )
+    for partition in partitions:
+        m_partition_offset.add_metric(
+            [cluster, consumer, partition['topic'], str(partition['partition'])],
+            partition['end']['offset']
+        )
+    yield m_partition_offset
+
+
+def metric_partition_status(cluster, consumer, partitions):
+    m_partition_status = GaugeMetricFamily(
+        "kafka_consumer_partition_status",
+        "Consumer partition status",
+        labels=["cluster", "consumer_group", "topic", "partition"]
+    )
+    for partition in partitions:
+        m_partition_status.add_metric(
+            [cluster, consumer, partition['topic'], str(partition['partition'])],
+            get_status(partition['status'])
+        )
+    yield m_partition_status
+
+
 def collect_topic_metrics(client, cluster, topic, metrics):
     if 'partition-offset' in metrics:
         yield from metric_topic_partition_offset(cluster, topic, client.get_topic_partition_offset(cluster, topic))
@@ -98,6 +144,8 @@ def collect_topic_metrics(client, cluster, topic, metrics):
 
 def collect_consumer_metrics(client, cluster, consumer, metrics):
     response = client.get_consumer_lag(cluster, consumer)
+    if 'status' in metrics:
+        yield from metric_consumer_status(cluster, consumer, response['status'])
 
     if 'total-lag' in metrics:
         yield from metric_consumer_total_lag(cluster, consumer, response['totallag'])
@@ -107,6 +155,12 @@ def collect_consumer_metrics(client, cluster, consumer, metrics):
 
     if 'partition-lag' in metrics:
         yield from metric_partition_lag(cluster, consumer, response['partitions'])
+
+    if 'partition-offset' in metrics:
+        yield from metric_partition_offset(cluster, consumer, response['partitions'])
+
+    if 'partition-status' in metrics:
+        yield from metric_partition_status(cluster, consumer, response['partitions'])
 
 
 class MetricsCollector(object):

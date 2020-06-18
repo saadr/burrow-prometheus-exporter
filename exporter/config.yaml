@@ -11,11 +11,10 @@ consumer_group:
   exclude: [burrow-local]
   metrics:
     - status
-    - partition-lag
     - total-lag
     - max-lag
-    - partition-current-offset
-    - partition-max-offset
+    - partition-lag
+    - partition-offset
     - partition-status
 
 topic:
