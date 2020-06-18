@@ -26,7 +26,7 @@ setup(name='burrow_prometheus_exporter',
       packages=find_packages(),
       entry_points={
           'console_scripts': [
-              'exporter=exporter:main',
+              'burrow_prometheus_exporter=burrow_prometheus_exporter.__main__:main',
           ],
       }
       )

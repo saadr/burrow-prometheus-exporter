@@ -1,13 +1,10 @@
-import yaml
 import logging
-import time
 from pathlib import Path
 
-from prometheus_client.exposition import start_http_server
-
-from exporter.burrow_client import BurrowClient
+import yaml
 from prometheus_client.core import GaugeMetricFamily
-from prometheus_client import REGISTRY
+
+from burrow_prometheus_exporter.burrow_client import BurrowClient
 
 log = logging.getLogger(__name__)
 
@@ -163,7 +160,7 @@ def collect_consumer_metrics(client, cluster, consumer, metrics):
         yield from metric_partition_status(cluster, consumer, response['partitions'])
 
 
-class MetricsCollector(object):
+class BurrowMetricsCollector(object):
 
     def collect(self):
         client = BurrowClient(conf('burrow.host'), conf('burrow.port'))
@@ -183,11 +180,5 @@ class MetricsCollector(object):
                     yield from collect_consumer_metrics(client, cluster, consumer, conf('consumer_group.metrics'))
 
 
-if __name__ == '__main__':
-    log.info('Starting server...')
-    port = 8001
-    start_http_server(port)
-    log.info(f'Server started on port {port}')
-    REGISTRY.register(MetricsCollector())
-    while True:
-        time.sleep(1)
+
+

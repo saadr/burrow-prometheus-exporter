@@ -7,8 +7,8 @@ cluster:
 #  exclude: : [cluster1, cluster2]
 
 consumer_group:
-  include: ['test_group']
-#  exclude: [burrow-local]
+  include: '*'
+#  exclude: : ['group1', '*pattern*', 'prefix-*']
   metrics:
     - status
     - total-lag
@@ -18,8 +18,8 @@ consumer_group:
     - partition-status
 
 topic:
-  include: ['test','__consumer_offsets', '*confluent*']
-  exclude: '*luent*'
+  include: '*'
+  exclude: : '__consumer_offsets'
   metrics:
     - partition-offset
 
