@@ -7,7 +7,7 @@ cluster:
 #  exclude: : [cluster1, cluster2]
 
 consumer_group:
-  include: [test_group]
+  include: ['test_group']
 #  exclude: [burrow-local]
   metrics:
     - status
@@ -18,8 +18,8 @@ consumer_group:
     - partition-status
 
 topic:
-#  include: *
-  exclude: [__consumer_offsets, __confluent.support.metrics]
+  include: ['test','__consumer_offsets', '*confluent*']
+  exclude: '*luent*'
   metrics:
     - partition-offset
 

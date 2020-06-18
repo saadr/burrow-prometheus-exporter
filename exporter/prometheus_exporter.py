@@ -164,8 +164,6 @@ def collect_consumer_metrics(client, cluster, consumer, metrics):
 
 
 class MetricsCollector(object):
-    def __init__(self):
-        pass
 
     def collect(self):
         client = BurrowClient(conf('burrow.host'), conf('burrow.port'))
