@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
 
-CONFIG_FILE = Path.cwd().parent / "config.yaml"
+CONFIG_FILE = "./config.yaml"
 
 
 class Config:
